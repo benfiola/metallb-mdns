@@ -1,0 +1,89 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: metallb-mdns
+  labels:
+    app: metallb-mdns
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: controller
+  namespace: metallb-mdns
+  labels:
+    app: metallb-mdns
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: controller
+  namespace: metallb-mdns
+  labels:
+    app: metallb-mdns
+rules:
+  - apiGroups: [""]
+    resources: [services]
+    verbs: [create, delete, get, list, patch, update, watch]
+  - apiGroups: [""]
+    resources: [services/statuses]
+    verbs: [get, update, patch]
+  - apiGroups: [""]
+    resources: [services/finalizers]
+    verbs: [update]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: controller
+  namespace: metallb-mdns
+  labels:
+    app: metallb-mdns
+subjects:
+  - kind: ServiceAccount
+    name: controller
+    apiGroup: ""
+    namespace: metallb-mdns
+roleRef:
+  kind: ClusterRole
+  name: controller
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: controller
+  namespace: metallb-mdns
+  labels:
+    app: metallb-mdns
+spec:
+  selector:
+    matchLabels:
+      app: metallb-mdns
+  template:
+    metadata:
+      labels:
+        app: metallb-mdns
+    spec:
+      serviceAccountName: controller
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: metallb-mdns
+          image: registry.local/bfiola/metallb-mdns:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - name: avahi-hosts
+              mountPath: /etc/avahi/hosts
+      volumes:
+        - name: avahi-hosts
+          hostPath:
+            path: /etc/avahi/hosts
