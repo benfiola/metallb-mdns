@@ -74,7 +74,7 @@ spec:
         "node-role.kubernetes.io/control-plane": "true"
       containers:
         - name: metallb-mdns
-          image: registry.local/bfiola/metallb-mdns:latest
+          image: bfiola/metallb-mdns:1.0.0
           imagePullPolicy: IfNotPresent
           resources:
             limits:

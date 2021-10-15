@@ -1,9 +1,10 @@
 # Build the manager binary
-FROM --platform=${BUILDPLATFORM} golang:1.16 as builder
 ARG BUILDPLATFORM
 ARG TARGETPLATFORM
 ARG TARGETOS
 ARG TARGETARCH
+
+FROM --platform=${BUILDPLATFORM} golang:1.16 as builder
 
 WORKDIR /workspace
 # Copy the Go Modules manifests
