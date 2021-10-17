@@ -1,0 +1,11 @@
+domain: my.domain
+layout:
+- go.kubebuilder.io/v3
+projectName: metallb-mdns
+repo: github.com/benfiola/metallb-mdns/v2
+resources:
+- controller: true
+  domain: my.domain
+  kind: Unknown
+  version: v1
+version: "3"
